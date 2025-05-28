@@ -1,0 +1,230 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: 0 0% 100%;
+  --foreground: 20 14.3% 4.1%;
+  --muted: 60 4.8% 95.9%;
+  --muted-foreground: 25 5.3% 44.7%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 20 14.3% 4.1%;
+  --card: 0 0% 100%;
+  --card-foreground: 20 14.3% 4.1%;
+  --border: 20 5.9% 90%;
+  --input: 20 5.9% 90%;
+  --primary: 330 81% 60%; /* Deep Pink #E91E63 */
+  --primary-foreground: 0 0% 100%;
+  --secondary: 60 4.8% 95.9%;
+  --secondary-foreground: 24 9.8% 10%;
+  --accent: 60 4.8% 95.9%;
+  --accent-foreground: 24 9.8% 10%;
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 60 9.1% 97.8%;
+  --ring: 20 14.3% 4.1%;
+  --radius: 0.5rem;
+  
+  /* Premium Nykaa-Inspired Pink Theme Colors */
+  --baby-pink: 195 78% 75%; /* #8ECAE6 - Soft Blue */
+  --soft-blush: 338 84% 91%; /* #F8E1EC - Light Pink Tint */
+  --deep-pink: 338 99% 51%; /* #FE036A - Vibrant Pink */
+  --accent-pink: 330 89% 76%; /* #F06293 - Vibrant Pink */
+  --charcoal: 220 15% 25%; /* #3A3F47 */
+  --off-white: 0 0% 99%; /* #FEFEFE */
+  --gradient-start: 338 84% 91%; /* #F8E1EC */
+  --gradient-end: 195 78% 88%; /* #C7E9F1 */
+}
+
+.dark {
+  --background: 240 10% 3.9%;
+  --foreground: 0 0% 98%;
+  --muted: 240 3.7% 15.9%;
+  --muted-foreground: 240 5% 64.9%;
+  --popover: 240 10% 3.9%;
+  --popover-foreground: 0 0% 98%;
+  --card: 240 10% 3.9%;
+  --card-foreground: 0 0% 98%;
+  --border: 240 3.7% 15.9%;
+  --input: 240 3.7% 15.9%;
+  --primary: 330 81% 60%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 240 3.7% 15.9%;
+  --secondary-foreground: 0 0% 98%;
+  --accent: 240 3.7% 15.9%;
+  --accent-foreground: 0 0% 98%;
+  --destructive: 0 62.8% 30.6%;
+  --destructive-foreground: 0 0% 98%;
+  --ring: 240 4.9% 83.9%;
+  --radius: 0.5rem;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans antialiased bg-background text-foreground;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+@layer utilities {
+  .text-abby-pink {
+    color: hsl(var(--abby-pink));
+  }
+  
+  .text-soft-blush {
+    color: hsl(var(--soft-blush));
+  }
+  
+  .text-deep-pink {
+    color: hsl(var(--deep-pink));
+  }
+  
+  .text-charcoal {
+    color: hsl(var(--charcoal));
+  }
+  
+  .text-off-white {
+    color: hsl(var(--off-white));
+  }
+  
+  .bg-abby-pink {
+    background-color: hsl(var(--abby-pink));
+  }
+  
+  .bg-soft-blush {
+    background-color: hsl(var(--soft-blush));
+  }
+  
+  .bg-deep-pink {
+    background-color: hsl(var(--deep-pink));
+  }
+  
+  .bg-charcoal {
+    background-color: hsl(var(--charcoal));
+  }
+  
+  .bg-off-white {
+    background-color: hsl(var(--off-white));
+  }
+  
+  .border-abby-pink {
+    border-color: hsl(var(--abby-pink));
+  }
+  
+  .border-deep-pink {
+    border-color: hsl(var(--deep-pink));
+  }
+
+  .bg-gradient-start {
+    background-color: hsl(var(--gradient-start));
+  }
+  
+  .bg-gradient-end {
+    background-color: hsl(var(--gradient-end));
+  }
+  
+  .text-accent-pink {
+    color: hsl(var(--accent-pink));
+  }
+  
+  .bg-accent-pink {
+    background-color: hsl(var(--accent-pink));
+  }
+
+  .bg-baby-pink {
+    background-color: hsl(var(--baby-pink));
+  }
+
+  .text-baby-pink {
+    color: hsl(var(--baby-pink));
+  }
+
+  /* Nykaa-Inspired Premium Gradients */
+  .bg-premium-gradient {
+    background: linear-gradient(135deg, hsl(var(--gradient-start)) 0%, hsl(var(--gradient-end)) 100%);
+  }
+  
+  .bg-premium-gradient-reverse {
+    background: linear-gradient(45deg, hsl(var(--gradient-end)) 0%, hsl(var(--gradient-start)) 100%);
+  }
+
+  .bg-nykaa-gradient {
+    background: linear-gradient(135deg, hsl(var(--deep-pink)) 0%, hsl(var(--accent-pink)) 50%, hsl(var(--baby-pink)) 100%);
+  }
+
+  .bg-soft-gradient {
+    background: linear-gradient(135deg, hsl(var(--soft-blush)) 0%, hsl(var(--baby-pink)) 100%);
+  }
+
+  /* Custom Animations */
+  .animate-fade-in {
+    animation: fadeIn 0.8s ease-in forwards;
+  }
+
+  .animate-fade-in-up {
+    animation: fadeInUp 0.8s ease-out forwards;
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  .animate-slide-in-left {
+    animation: slideInLeft 0.8s ease-out forwards;
+  }
+
+  .animate-slide-in-right {
+    animation: slideInRight 0.8s ease-out forwards;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes slideInLeft {
+    from {
+      opacity: 0;
+      transform: translateX(-30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes slideInRight {
+    from {
+      opacity: 0;
+      transform: translateX(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  /* Pulse effect for CTA buttons */
+  .animate-pulse-slow {
+    animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+}
