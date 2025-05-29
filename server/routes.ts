@@ -2,7 +2,23 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertClarityCallRequestSchema } from "@shared/schema";
+import GoogleSheetsService from "./google-sheets";
 import { z } from "zod";
+
+type ClarityCallData = {
+  name: string;
+  email: string;
+  phone: string;
+  businessType: string;
+  yearsInBusiness: string;
+  annualRevenue: string;
+  biggestChallenge: string;
+  customChallenge?: string;
+  openToContact: boolean;
+};
+
+
+const googleSheetsService = new GoogleSheetsService();
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Submit clarity call request
@@ -10,15 +26,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const requestData = insertClarityCallRequestSchema.parse(req.body);
       
-      // Create the request in storage
       const clarityCallRequest = await storage.createClarityCallRequest(requestData);
       
-      // In a real implementation, you would integrate with Google Sheets here
-      // For now, we'll just log the data and return success
-      console.log("Clarity call request received:", clarityCallRequest);
+      try {
+        const sheetsData: ClarityCallData = {
+          name: clarityCallRequest.name,
+          email: clarityCallRequest.email,
+          phone: clarityCallRequest.phone,
+          businessType: clarityCallRequest.businessType,
+          yearsInBusiness: clarityCallRequest.yearsInBusiness,
+          annualRevenue: clarityCallRequest.annualRevenue,
+          biggestChallenge: clarityCallRequest.biggestChallenge,
+          customChallenge: clarityCallRequest.customChallenge || undefined,
+          openToContact: Boolean(clarityCallRequest.openToContact)
+        };
+        
+        await googleSheetsService.addClarityCallRequest(sheetsData);
+      } catch (sheetsError) {
+        console.error("Google Sheets error (non-blocking):", sheetsError);
+      }
       
-      // Here you would add Google Sheets integration:
-      // await sendToGoogleSheets(clarityCallRequest);
+      console.log("Clarity call request received:", clarityCallRequest);
       
       res.json({ 
         success: true, 
@@ -42,7 +70,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get all clarity call requests (for admin purposes)
   app.get("/api/clarity-calls", async (req, res) => {
     try {
       const requests = await storage.getClarityCallRequests();

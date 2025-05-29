@@ -1,5 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { GraduationCap, Trophy } from "lucide-react";
+import Img from "./assets/Taibapic.png";
 
 export default function AboutSection() {
   return (
@@ -9,7 +10,7 @@ export default function AboutSection() {
           <div className="relative">
             <div className="relative group">
               <img 
-                src="https://www.canva.com/design/DAGou3IQqm4/fwor6zExhRdFxMVdVcPHig/view?utm_content=DAGou3IQqm4&utm_campaign=designshare&utm_medium=link2&utm_source=uniquelinks&utlId=hcde4cb951d" 
+                src={Img} 
                 alt="Taiba Mahmood - Professional Business Coach" 
                 className="rounded-3xl shadow-2xl w-full h-[700px] object-cover group-hover:scale-105 transition-transform duration-700"
               />

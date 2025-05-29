@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
@@ -33,20 +33,13 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Loader2, ArrowLeft } from "lucide-react";
+import { Loader2, ArrowLeft, CheckCircle } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
-import { apiRequest } from "@/lib/queryClient";
 
 const step1Schema = z.object({
-  businessType: z.string().min(1, "Please select what best describes you")
-    .refine((value) => value === "coach-consultant" || value === "service-business", 
-      "We currently only work with coaches/consultants and service-based businesses"),
-  yearsInBusiness: z.string().min(1, "Please select how long you've been in business")
-    .refine((value) => value !== "less-than-1", 
-      "We work with businesses that have been running for at least 1 year"),
-  annualRevenue: z.string().min(1, "Please select your current annual revenue")
-    .refine((value) => value === "10-25-lakhs" || value === "25-lakhs-plus", 
-      "We work with businesses generating ₹10L+ annual revenue"),
+  businessType: z.string().min(1, "Please select what best describes you"),
+  yearsInBusiness: z.string().min(1, "Please select how long you've been in business"),
+  annualRevenue: z.string().min(1, "Please select your current annual revenue"),
 });
 
 const step2Schema = z.object({
@@ -72,6 +65,7 @@ interface ClarityCallModalProps {
 export default function ClarityCallModal({ isOpen, onClose }: ClarityCallModalProps) {
   const [step, setStep] = useState(1);
   const [step1Data, setStep1Data] = useState<Step1FormData | null>(null);
+  const [showThankYou, setShowThankYou] = useState(false);
   const { toast } = useToast();
   const [, setLocation] = useLocation();
 
@@ -94,56 +88,113 @@ export default function ClarityCallModal({ isOpen, onClose }: ClarityCallModalPr
       customChallenge: "",
       openToContact: "",
     },
+    mode: "onChange",
   });
+
+  // Reset step2 form when moving to step 2
+  useEffect(() => {
+    if (step === 2) {
+      step2Form.reset({
+        name: "",
+        phone: "",
+        email: "",
+        biggestChallenge: "",
+        customChallenge: "",
+        openToContact: "",
+      });
+    }
+  }, [step, step2Form]);
 
   const mutation = useMutation({
     mutationFn: async (data: FullFormData) => {
-      const response = await apiRequest("/api/clarity-call-requests", {
+      const response = await fetch("/api/clarity-call", {
         method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify(data),
       });
-      return response;
+      
+      if (!response.ok) {
+        throw new Error("Failed to submit form");
+      }
+      
+      return response.json();
     },
     onSuccess: () => {
-      toast({
-        title: "Success!",
-        description: "Your clarity call request has been submitted. We'll be in touch soon!",
-      });
-      onClose();
-      setStep(1);
-      step1Form.reset();
-      step2Form.reset();
-      setStep1Data(null);
-      setLocation("/thank-you");
+      setShowThankYou(true);
+      setTimeout(() => {
+        setShowThankYou(false);
+        onClose();
+        resetAllForms();
+        setLocation("/thank-you");
+      }, 3000);
     },
     onError: (error: Error) => {
       toast({
         title: "Error",
-        description: "Something went wrong. Please try again.",
+        description: error.message || "Something went wrong. Please try again.",
         variant: "destructive",
       });
     },
   });
 
+  const resetAllForms = () => {
+    setStep(1);
+    setStep1Data(null);
+    step1Form.reset();
+    step2Form.reset();
+  };
+
   const handleStep1Submit = (data: Step1FormData) => {
+    console.log("Step 1 data:", data);
     setStep1Data(data);
     setStep(2);
   };
 
   const handleStep2Submit = (data: Step2FormData) => {
+    console.log("Step 2 data:", data);
     if (step1Data) {
       const fullData: FullFormData = { ...step1Data, ...data };
+      console.log("Full data:", fullData);
       mutation.mutate(fullData);
     }
   };
 
   const goBack = () => {
     setStep(1);
-    setStep1Data(null);
   };
 
+  const handleClose = () => {
+    if (!mutation.isPending) {
+      onClose();
+      resetAllForms();
+      setShowThankYou(false);
+    }
+  };
+
+  // Debug: Log form values
+  const step2Values = step2Form.watch();
+  console.log("Step 2 form values:", step2Values);
+
+  if (showThankYou) {
+    return (
+      <Dialog open={isOpen} onOpenChange={handleClose}>
+        <DialogContent className="sm:max-w-md">
+          <div className="text-center py-8">
+            <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
+            <h2 className="text-2xl font-bold text-charcoal mb-2">Thank You!</h2>
+            <p className="text-gray-600">
+              Your clarity call request has been submitted successfully. We'll be in touch soon!
+            </p>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-center text-2xl font-bold text-charcoal">
@@ -153,7 +204,7 @@ export default function ClarityCallModal({ isOpen, onClose }: ClarityCallModalPr
 
         {step === 1 ? (
           <Form {...step1Form}>
-            <form onSubmit={step1Form.handleSubmit(handleStep1Submit)} className="space-y-6">
+            <form onSubmit={step1Form.handleSubmit(handleStep1Submit)} className="space-y-6" key="step1-form">
               <FormField
                 control={step1Form.control}
                 name="businessType"
@@ -169,20 +220,20 @@ export default function ClarityCallModal({ isOpen, onClose }: ClarityCallModalPr
                         className="space-y-3"
                       >
                         <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="coach-consultant" id="coach-consultant" />
-                          <Label htmlFor="coach-consultant">I'm a coach/consultant running my own business</Label>
+                          <RadioGroupItem value="coach-consultant" id="step1-coach-consultant" />
+                          <Label htmlFor="step1-coach-consultant">I'm a coach/consultant running my own business</Label>
                         </div>
                         <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="service-business" id="service-business" />
-                          <Label htmlFor="service-business">I run a service-based business</Label>
+                          <RadioGroupItem value="service-business" id="step1-service-business" />
+                          <Label htmlFor="step1-service-business">I run a service-based business</Label>
                         </div>
                         <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="working-professional" id="working-professional" />
-                          <Label htmlFor="working-professional">I'm a working professional exploring sales coaching</Label>
+                          <RadioGroupItem value="working-professional" id="step1-working-professional" />
+                          <Label htmlFor="step1-working-professional">I'm a working professional exploring sales coaching</Label>
                         </div>
                         <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="student-fresher" id="student-fresher" />
-                          <Label htmlFor="student-fresher">I'm a student/fresher</Label>
+                          <RadioGroupItem value="student-fresher" id="step1-student-fresher" />
+                          <Label htmlFor="step1-student-fresher">I'm a student/fresher</Label>
                         </div>
                       </RadioGroup>
                     </FormControl>
@@ -206,20 +257,20 @@ export default function ClarityCallModal({ isOpen, onClose }: ClarityCallModalPr
                         className="space-y-3"
                       >
                         <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="less-than-1" id="less-than-1" />
-                          <Label htmlFor="less-than-1">Less than 1 year</Label>
+                          <RadioGroupItem value="less-than-1" id="step1-less-than-1" />
+                          <Label htmlFor="step1-less-than-1">Less than 1 year</Label>
                         </div>
                         <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="1-2-years" id="1-2-years" />
-                          <Label htmlFor="1-2-years">1–2 years</Label>
+                          <RadioGroupItem value="1-2-years" id="step1-1-2-years" />
+                          <Label htmlFor="step1-1-2-years">1–2 years</Label>
                         </div>
                         <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="2-5-years" id="2-5-years" />
-                          <Label htmlFor="2-5-years">2–5 years</Label>
+                          <RadioGroupItem value="2-5-years" id="step1-2-5-years" />
+                          <Label htmlFor="step1-2-5-years">2–5 years</Label>
                         </div>
                         <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="5-plus-years" id="5-plus-years" />
-                          <Label htmlFor="5-plus-years">5+ years</Label>
+                          <RadioGroupItem value="5-plus-years" id="step1-5-plus-years" />
+                          <Label htmlFor="step1-5-plus-years">5+ years</Label>
                         </div>
                       </RadioGroup>
                     </FormControl>
@@ -243,16 +294,16 @@ export default function ClarityCallModal({ isOpen, onClose }: ClarityCallModalPr
                         className="space-y-3"
                       >
                         <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="5-10-lakhs" id="5-10-lakhs" />
-                          <Label htmlFor="5-10-lakhs">₹5–10 lakhs</Label>
+                          <RadioGroupItem value="5-10-lakhs" id="step1-5-10-lakhs" />
+                          <Label htmlFor="step1-5-10-lakhs">₹5–10 lakhs</Label>
                         </div>
                         <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="10-25-lakhs" id="10-25-lakhs" />
-                          <Label htmlFor="10-25-lakhs">₹10–25 lakhs</Label>
+                          <RadioGroupItem value="10-25-lakhs" id="step1-10-25-lakhs" />
+                          <Label htmlFor="step1-10-25-lakhs">₹10–25 lakhs</Label>
                         </div>
                         <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="25-lakhs-plus" id="25-lakhs-plus" />
-                          <Label htmlFor="25-lakhs-plus">₹25 lakhs+</Label>
+                          <RadioGroupItem value="25-lakhs-plus" id="step1-25-lakhs-plus" />
+                          <Label htmlFor="step1-25-lakhs-plus">₹25 lakhs+</Label>
                         </div>
                       </RadioGroup>
                     </FormControl>
@@ -271,7 +322,7 @@ export default function ClarityCallModal({ isOpen, onClose }: ClarityCallModalPr
           </Form>
         ) : (
           <Form {...step2Form}>
-            <form onSubmit={step2Form.handleSubmit(handleStep2Submit)} className="space-y-6">
+            <form onSubmit={step2Form.handleSubmit(handleStep2Submit)} className="space-y-6" key="step2-form">
               <div className="flex items-center gap-2 mb-4">
                 <Button
                   type="button"
@@ -292,7 +343,14 @@ export default function ClarityCallModal({ isOpen, onClose }: ClarityCallModalPr
                   <FormItem>
                     <FormLabel className="text-charcoal font-semibold">4. Name</FormLabel>
                     <FormControl>
-                      <Input placeholder="Enter your full name" {...field} />
+                      <Input 
+                        placeholder="Enter your full name" 
+                        {...field}
+                        onChange={(e) => {
+                          console.log("Name input change:", e.target.value);
+                          field.onChange(e);
+                        }}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -306,7 +364,14 @@ export default function ClarityCallModal({ isOpen, onClose }: ClarityCallModalPr
                   <FormItem>
                     <FormLabel className="text-charcoal font-semibold">5. Phone</FormLabel>
                     <FormControl>
-                      <Input placeholder="Enter your phone number" {...field} />
+                      <Input 
+                        placeholder="Enter your phone number" 
+                        {...field}
+                        onChange={(e) => {
+                          console.log("Phone input change:", e.target.value);
+                          field.onChange(e);
+                        }}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -320,7 +385,15 @@ export default function ClarityCallModal({ isOpen, onClose }: ClarityCallModalPr
                   <FormItem>
                     <FormLabel className="text-charcoal font-semibold">6. Email</FormLabel>
                     <FormControl>
-                      <Input placeholder="Enter your email" type="email" {...field} />
+                      <Input 
+                        placeholder="Enter your email" 
+                        type="email" 
+                        {...field}
+                        onChange={(e) => {
+                          console.log("Email input change:", e.target.value);
+                          field.onChange(e);
+                        }}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -362,7 +435,10 @@ export default function ClarityCallModal({ isOpen, onClose }: ClarityCallModalPr
                     <FormItem>
                       <FormLabel className="text-charcoal font-semibold">Please specify your challenge</FormLabel>
                       <FormControl>
-                        <Input placeholder="Describe your specific challenge" {...field} />
+                        <Input 
+                          placeholder="Describe your specific challenge" 
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -385,12 +461,12 @@ export default function ClarityCallModal({ isOpen, onClose }: ClarityCallModalPr
                         className="space-y-3"
                       >
                         <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="yes" id="yes" />
-                          <Label htmlFor="yes">Yes</Label>
+                          <RadioGroupItem value="yes" id="step2-yes-contact" />
+                          <Label htmlFor="step2-yes-contact">Yes</Label>
                         </div>
                         <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="no" id="no" />
-                          <Label htmlFor="no">No</Label>
+                          <RadioGroupItem value="no" id="step2-no-contact" />
+                          <Label htmlFor="step2-no-contact">No</Label>
                         </div>
                       </RadioGroup>
                     </FormControl>
