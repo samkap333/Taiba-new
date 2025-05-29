@@ -97,13 +97,14 @@ export default function PainPointsSection({ onOpenModal }: PainPointsSectionProp
             <p className="text-xl text-gray-700 mb-8 leading-relaxed">
               In just 30 minutes, discover how to turn every sales conversation into confident, authentic success.
             </p>
-            <Button 
-              onClick={onOpenModal}
-              size="lg"
-              className="bg-nykaa-gradient text-white px-12 py-6 rounded-full hover:scale-105 transition-all duration-300 font-bold text-xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 border border-white/20"
-            >
-              Get My Free Breakthrough Session
-            </Button>
+<Button 
+  onClick={onOpenModal}
+  size="lg"
+  className="bg-nykaa-gradient text-white text-sm sm:text-base md:text-xl font-semibold sm:font-bold px-4 sm:px-8 md:px-12 py-3 sm:py-5 md:py-6 rounded-full w-[90%] sm:w-auto mx-auto flex items-center justify-center shadow-md hover:shadow-lg hover:scale-105 transform hover:-translate-y-1 transition-all duration-300 border border-white/20"
+>
+  Get My Free Breakthrough Session
+</Button>
+
             <div className="mt-6 text-accent-pink font-medium">
               Limited spots available this week
             </div>

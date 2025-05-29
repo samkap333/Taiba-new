@@ -34,14 +34,15 @@ export default function HeroSection({ onOpenModal }: HeroSectionProps) {
             </p>
             
             <div className="mb-12">
-              <Button 
-                onClick={onOpenModal}
-                size="lg"
-                className="bg-nykaa-gradient text-white px-12 py-6 rounded-full hover:scale-105 transition-all duration-300 font-bold text-xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 border border-white/20"
-              >
-                <Calendar className="mr-3 h-6 w-6" />
-                Book Your Free Strategy Call
-              </Button>
+ <Button 
+  onClick={onOpenModal}
+  size="lg"
+  className="bg-nykaa-gradient text-white px-6 sm:px-8 md:px-12 py-4 sm:py-5 md:py-6 rounded-full hover:scale-105 transition-all duration-300 font-semibold sm:font-bold text-base sm:text-lg md:text-xl shadow-md sm:shadow-lg hover:shadow-xl transform hover:-translate-y-1 border border-white/20 w-[90%] sm:w-auto mx-auto flex justify-center items-center"
+>
+  <Calendar className="mr-2 sm:mr-3 h-5 w-5 sm:h-6 sm:w-6" />
+  Book Your Free Strategy Call
+</Button>
+
             </div>
             
             <div className="grid grid-cols-3 gap-8 p-8 bg-white/90 backdrop-blur-sm rounded-3xl border border-accent-pink/20 shadow-xl">

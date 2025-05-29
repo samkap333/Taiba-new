@@ -31,14 +31,14 @@ export default function CTASection({ onOpenModal }: CTASectionProps) {
           </p>
           
           <div className="space-y-8">
-            <Button 
-              onClick={onOpenModal}
-              size="lg"
-              className="bg-deep-pink text-white px-16 py-8 rounded-full hover:bg-accent-pink hover:scale-105 transition-all duration-300 font-bold text-2xl shadow-xl hover:shadow-2xl transform hover:-translate-y-2"
-            >
-              <Calendar className="mr-4 h-8 w-8" />
-              Book My FREE Strategy Call Now
-            </Button>
+<Button 
+  onClick={onOpenModal}
+  size="lg"
+  className="bg-deep-pink text-white text-sm sm:text-base md:text-xl font-semibold sm:font-bold px-4 sm:px-8 md:px-16 py-3 sm:py-5 md:py-6 rounded-full w-[90%] sm:w-auto mx-auto flex items-center justify-center shadow-md hover:shadow-xl transform hover:scale-105 hover:-translate-y-1 transition-all duration-300"
+>
+  Book My FREE Strategy Call Now
+</Button>
+
             
             <div className="flex flex-col md:flex-row justify-center items-center gap-8 text-gray-700">
               <div className="flex items-center gap-2">
